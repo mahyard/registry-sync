@@ -43,11 +43,11 @@ write_metrics() {
     metrics_file_basename=$(basename $METRICS_FILE)
     cat "$METRICS_FILE" - <<EOF > /var/lib/prometheus/node-exporter/$metrics_file_basename
 
-jfrog_sync_last_timestamp_seconds{job="import",repo="docker"} $script_start_time
-jfrog_sync_last_duration_seconds{job="import",repo="docker"} $script_duration
-jfrog_sync_images_total{job="import",repo="docker",status="success"} $success_count
-jfrog_sync_images_total{job="import",repo="docker",status="failure"} $failure_count
-jfrog_sync_status{job="import",repo="docker"} $overall_status
+jfrog_sync_last_timestamp_seconds{action="import",repo="docker"} $script_start_time
+jfrog_sync_last_duration_seconds{action="import",repo="docker"} $script_duration
+jfrog_sync_images_total{action="import",repo="docker",status="success"} $success_count
+jfrog_sync_images_total{action="import",repo="docker",status="failure"} $failure_count
+jfrog_sync_status{action="import",repo="docker"} $overall_status
 EOF
 }
 

@@ -56,11 +56,11 @@ write_metrics() {
 # HELP jfrog_sync_status Sync script execution status (1 = successful, 0 = unsuccessful).
 # TYPE jfrog_sync_status gauge
 
-jfrog_sync_last_timestamp_seconds{job="export",repo="docker"} $script_start_time
-jfrog_sync_last_duration_seconds{job="export",repo="docker"} $script_duration
-jfrog_sync_images_total{job="export",repo="docker",status="success"} $success_count
-jfrog_sync_images_total{job="export",repo="docker",status="failure"} $failure_count
-jfrog_sync_status{job="export",repo="docker"} $overall_status
+jfrog_sync_last_timestamp_seconds{action="export",repo="docker"} $script_start_time
+jfrog_sync_last_duration_seconds{action="export",repo="docker"} $script_duration
+jfrog_sync_images_total{action="export",repo="docker",status="success"} $success_count
+jfrog_sync_images_total{action="export",repo="docker",status="failure"} $failure_count
+jfrog_sync_status{action="export",repo="docker"} $overall_status
 EOF
 }
 
