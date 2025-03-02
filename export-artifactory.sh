@@ -113,7 +113,7 @@ mkdir -p "$TARGET_DIR"
 # Export images
 for img in $images; do
     image_ref="$JFROG_URL/docker/$img"
-    image_file="$TARGET_DIR/docker-image-$(echo -n "$img" | base64).tar.gz"
+    image_file="$TARGET_DIR/docker-image-$(echo -n "$img" | base64 -w0).tar.gz"
     log_info "Exporting image: $image_ref to file: $image_file"
     
     regctl image export -p local --compress "$image_ref" > "$image_file"
