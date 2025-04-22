@@ -17,6 +17,7 @@ DEFAULT_METRICS_FILE="/var/log/registry-sync-metrics.prom"
 JFROG_URL=${JFROG_URL:-$DEFAULT_JFROG_URL}
 TARGET_DIR=${TARGET_DIR:-$DEFAULT_TARGET_DIR}
 METRICS_FILE=${METRICS_FILE:-$DEFAULT_METRICS_FILE}
+LOCK_FILE="$TARGET_DIR/.sync-docker.lock"
 
 # Metrics variables
 script_start_time=$(date +%s)
@@ -32,6 +33,12 @@ log_info() {
 log_error() {
     echo "$(date '+%Y-%m-%d %H:%M:%S') ERROR: $1" >&2
 }
+
+# Ensure to run the task after the export process has completed
+if [[ -e $LOCK_FILE ]]; then
+    log_error "The export process is ongoing. Remove $LOCK_FILE if you know what you're doing."
+    exit 1
+fi
 
 # Function to write metrics to file
 write_metrics() {

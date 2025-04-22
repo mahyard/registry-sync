@@ -22,6 +22,7 @@ JF_ACCESS_TOKEN=${JF_ACCESS_TOKEN:-$DEFAULT_JF_ACCESS_TOKEN}
 HEADER_AUTH="Authorization: Bearer $JF_ACCESS_TOKEN"
 TARGET_DIR=${TARGET_DIR:-$DEFAULT_TARGET_DIR}
 METRICS_FILE=${METRICS_FILE:-$DEFAULT_METRICS_FILE}
+LOCK_FILE="$TARGET_DIR/.sync-docker.lock"
 
 # Metrics variables
 script_start_time=$(date +%s)
@@ -37,6 +38,17 @@ log_info() {
 log_error() {
     echo "$(date '+%Y-%m-%d %H:%M:%S') ERROR: $1" >&2
 }
+
+# Ensure to be the master and not a secondry instance
+if [[ -e $LOCK_FILE ]]; then
+    log_error "Another instance is running. Remove $LOCK_FILE if you know what you do."
+    exit 1
+else
+    # Make sure TARGET_DIR exists
+    mkdir -p "$TARGET_DIR"
+
+    touch $LOCK_FILE
+fi
 
 # Function to write metrics to file
 write_metrics() {
@@ -64,8 +76,13 @@ jfrog_sync_status{action="export",repo="docker"} $overall_status
 EOF
 }
 
+cleanup() {
+    # Keep script running until we can remove lock file
+    while ! rm -f $LOCK_FILE &>/dev/null; do sleep 1; done
+}
+
 # Trap to ensure metrics are written on exit
-trap 'overall_status=$(($? == 0 ? 1 : 0)); write_metrics' EXIT
+trap 'overall_status=$(($? == 0 ? 1 : 0)); write_metrics; cleanup' EXIT
 
 # Check user running the script
 if [ "$(id --user --name)" != "root" ]; then
@@ -106,9 +123,6 @@ if [ -z "$images" ]; then
     log_info "No images found to export."
     exit 0
 fi
-
-# Make sure TARGET_DIR exists
-mkdir -p "$TARGET_DIR"
 
 # Export images
 for img in $images; do
